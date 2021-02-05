@@ -3,6 +3,7 @@ package main
 import (
 	"fmt"
 	"io/ioutil"
+	"sort"
 	"strconv"
 	"strings"
 )
@@ -16,32 +17,63 @@ func main() {
 		"e_many_teams.in",
 	}
 
-	desired := 0
+	// desired := 0
+	for _, fileName := range files {
+		inputSet := readFile(fmt.Sprintf("./dataset/%s", fileName))
 
-	inputSet := readFile(fmt.Sprintf("./dataset/%s", files[desired]))
+		parts := strings.Split(inputSet, "\n")
+		config := getConfig(parts[0])
+		pizzas := make([]Pizza, config.pizzaNumber)
+		for i := 0; i < config.pizzaNumber; i++ {
+			pizzas[i] = getPizzaIngredients(parts[i+1], i)
+		}
 
-	parts := strings.Split(inputSet, "\n")
-	config := getConfig(parts[0])
-	pizzas := make([]Pizza, config.pizzaNumber)
-	for i := 0; i < config.pizzaNumber; i++ {
-		pizzas[i] = getPizzaIngredients(parts[i+1], i)
+		sortPizzas(pizzas)
+		orders := firstPlaceOrder(config, pizzas)
+		result := fmt.Sprintf("%d\n", len(orders))
+		for _, order := range orders {
+			result += fmt.Sprintf("%d %s\n", len(order.pizzas), strings.Join(order.pizzas, " "))
+		}
+		fmt.Printf("%s", result)
+
+		ioutil.WriteFile(fmt.Sprintf("./result/%s", fileName), []byte(result), 0644)
 	}
+}
 
-	orders := firstPlaceOrder(config, pizzas)
-	result := fmt.Sprintf("%d\n", len(orders))
-	for _, order := range orders {
-		result += fmt.Sprintf("%d %s\n", len(order.pizzas), strings.Join(order.pizzas, " "))
-	}
-	fmt.Printf("%s", result)
-
-	ioutil.WriteFile(fmt.Sprintf("./result/%s", files[desired]), []byte(result), 0644)
+func sortPizzas(pizzas []Pizza) {
+	sort.Slice(pizzas, func(i, j int) bool {
+		return pizzas[i].nIngr > pizzas[j].nIngr
+	})
 }
 
 func firstPlaceOrder(config Config, pizzas []Pizza) []OrderDelivery {
 	orders := []OrderDelivery{}
-
 	pizzaCounter := 0
 
+	// for i := 0; i < config.nTeamOfFour; i++ {
+	// 	if pizzaCounter+4 > len(pizzas) {
+	// 		return orders
+	// 	}
+
+	// 	order := OrderDelivery{}
+	// 	pizzasOrder := make([]string, 4)
+
+	// 	for j := pizzaCounter; j < pizzaCounter+4; {
+	// 		matches := howManyIngredientEquals(pizzas[j].ingrMap, pizzas[j+1].ingrMap)
+	// 		if matches == 0 {
+	// 			pizzasOrder[i] = pizzas[j].pizzaID
+	// 			pizzasOrder[i+1] = pizzas[j+1].pizzaID
+	// 			j += 2
+	// 			continue
+	// 		}
+	// 		j++
+	// 	}
+
+	// 	pizzaCounter += 4
+	// 	orders = append(orders, order)
+	// }
+
+	// FILL ORDERS
 	for i := 0; i < config.nTeamOfFour; i++ {
 		if pizzaCounter+4 > len(pizzas) {
 			return orders
@@ -117,6 +149,7 @@ type Pizza struct {
 	ingredients []string
 	ingrMap     map[string]bool
 	pizzaID     string
+	taken       bool
 }
 
 func getPizzaIngredients(pizzaLine string, pizzaID int) Pizza {
@@ -156,4 +189,13 @@ func toint(num string) int {
 		panic(err)
 	}
 	return res
+}
+
+func howManyIngredientEquals(pizzaIngredientsA map[string]bool, pizzaIngredientsB map[string]bool) (matches int) {
+	for ingrA := range pizzaIngredientsA {
+		if pizzaIngredientsB[ingrA] {
+			matches++
+		}
+	}
+	return
 }
