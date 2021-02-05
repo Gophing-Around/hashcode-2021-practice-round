@@ -50,28 +50,54 @@ func firstPlaceOrder(config Config, pizzas []Pizza) []OrderDelivery {
 	orders := []OrderDelivery{}
 	pizzaCounter := 0
 
-	// for i := 0; i < config.nTeamOfFour; i++ {
-	// 	if pizzaCounter+4 > len(pizzas) {
-	// 		return orders
-	// 	}
+	for i := 0; i < config.nTeamOfFour; i++ {
+		if pizzaCounter+4 > len(pizzas) {
+			return orders
+		}
 
-	// 	order := OrderDelivery{}
-	// 	pizzasOrder := make([]string, 4)
+		pizzasOrder := make([]Pizza, 4)
 
-	// 	for j := pizzaCounter; j < pizzaCounter+4; {
-	// 		matches := howManyIngredientEquals(pizzas[j].ingrMap, pizzas[j+1].ingrMap)
-	// 		if matches == 0 {
-	// 			pizzasOrder[i] = pizzas[j].pizzaID
-	// 			pizzasOrder[i+1] = pizzas[j+1].pizzaID
-	// 			j += 2
-	// 			continue
-	// 		}
-	// 		j++
-	// 	}
+		for {
+			if !pizzas[pizzaCounter].taken {
+				break
+			}
+			pizzaCounter++
+		}
 
-	// 	pizzaCounter += 4
-	// 	orders = append(orders, order)
-	// }
+		// pizzasOrder = append(pizzasOrder, pizzas[pizzaCounter])
+		pizzasOrder[0] = pizzas[pizzaCounter]
+		pizzas[pizzaCounter].taken = true
+		pizzaCounter++
+
+		initC := 1
+		for j := pizzaCounter; j < len(pizzas); j++ {
+			if pizzas[j].taken {
+				continue
+			}
+
+			var hasMatches bool
+			for _, piOrder := range pizzasOrder {
+				if howManyIngredientEquals(piOrder.ingrMap, pizzas[j].ingrMap) != 0 {
+					hasMatches = true
+				}
+			}
+			if !hasMatches {
+				pizzas[j].taken = true
+				pizzasOrder[initC] = pizzas[j]
+				initC++
+			}
+			if initC == 4 {
+				break
+			}
+		}
+
+		order := OrderDelivery{
+			pizzas: getPizzasIDs(pizzas),
+		}
+
+		pizzaCounter += 4
+		orders = append(orders, order)
+	}
 
 	// FILL ORDERS
 	for i := 0; i < config.nTeamOfFour; i++ {
@@ -123,6 +149,14 @@ func firstPlaceOrder(config Config, pizzas []Pizza) []OrderDelivery {
 	}
 
 	return orders
+}
+
+func getPizzasIDs(pizzas []Pizza) []string {
+	result := make([]string, len(pizzas))
+	for i, pizza := range pizzas {
+		result[i] = pizza.pizzaID
+	}
+	return result
 }
 
 func readFile(source string) string {
