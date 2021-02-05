@@ -48,6 +48,9 @@ func sortPizzas(pizzas []Pizza) {
 func firstPlaceOrder(config Config, pizzas []Pizza) []OrderDelivery {
 	orders := []OrderDelivery{}
 	pizzaCounter := 0
+	teamOfFour := config.nTeamOfFour
+	teamOfThree := config.nTeamOfThree
+	teamOfTwo := config.nTeamOfTwo
 
 	for i := 0; i < config.nTeamOfFour; i++ {
 		pizzasOrder := make([]Pizza, 4)
@@ -94,6 +97,123 @@ func firstPlaceOrder(config Config, pizzas []Pizza) []OrderDelivery {
 
 		if initC == 4 {
 			orders = append(orders, order)
+			teamOfFour--
+		} else {
+			for idx, pizza := range pizzas {
+				for _, pizzaOrder := range pizzasOrder {
+					if pizzaOrder.pizzaID == pizza.pizzaID {
+						pizzas[idx].taken = false
+					}
+				}
+			}
+		}
+	}
+
+	pizzaCounter = 0
+	for i := 0; i < config.nTeamOfThree; i++ {
+		pizzasOrder := make([]Pizza, 3)
+
+		for pizzaCounter < len(pizzas) {
+			if !pizzas[pizzaCounter].taken {
+				break
+			}
+			pizzaCounter++
+		}
+		if pizzaCounter == len(pizzas) {
+			break
+		}
+
+		pizzasOrder[0] = pizzas[pizzaCounter]
+		pizzas[pizzaCounter].taken = true
+		pizzaCounter++
+
+		initC := 1
+		for j := pizzaCounter; j < len(pizzas); j++ {
+			if pizzas[j].taken {
+				continue
+			}
+
+			var hasMatches bool
+			for _, piOrder := range pizzasOrder {
+				if howManyIngredientEquals(piOrder.ingrMap, pizzas[j].ingrMap) != 0 {
+					hasMatches = true
+				}
+			}
+			if !hasMatches {
+				pizzas[j].taken = true
+				pizzasOrder[initC] = pizzas[j]
+				initC++
+			}
+			if initC == 3 {
+				break
+			}
+		}
+
+		order := OrderDelivery{
+			pizzas: getPizzasIDs(pizzasOrder),
+		}
+
+		if initC == 3 {
+			orders = append(orders, order)
+			teamOfThree--
+		} else {
+			for idx, pizza := range pizzas {
+				for _, pizzaOrder := range pizzasOrder {
+					if pizzaOrder.pizzaID == pizza.pizzaID {
+						pizzas[idx].taken = false
+					}
+				}
+			}
+		}
+	}
+
+	pizzaCounter = 0
+	for i := 0; i < config.nTeamOfTwo; i++ {
+		pizzasOrder := make([]Pizza, 2)
+
+		for pizzaCounter < len(pizzas) {
+			if !pizzas[pizzaCounter].taken {
+				break
+			}
+			pizzaCounter++
+		}
+		if pizzaCounter == len(pizzas) {
+			break
+		}
+
+		pizzasOrder[0] = pizzas[pizzaCounter]
+		pizzas[pizzaCounter].taken = true
+		pizzaCounter++
+
+		initC := 1
+		for j := pizzaCounter; j < len(pizzas); j++ {
+			if pizzas[j].taken {
+				continue
+			}
+
+			var hasMatches bool
+			for _, piOrder := range pizzasOrder {
+				if howManyIngredientEquals(piOrder.ingrMap, pizzas[j].ingrMap) != 0 {
+					hasMatches = true
+				}
+			}
+			if !hasMatches {
+				pizzas[j].taken = true
+				pizzasOrder[initC] = pizzas[j]
+				initC++
+			}
+			if initC == 2 {
+				break
+			}
+		}
+
+		order := OrderDelivery{
+			pizzas: getPizzasIDs(pizzasOrder),
+		}
+
+		if initC == 2 {
+			orders = append(orders, order)
+			teamOfTwo--
 		} else {
 			for idx, pizza := range pizzas {
 				for _, pizzaOrder := range pizzasOrder {
@@ -117,7 +237,7 @@ func firstPlaceOrder(config Config, pizzas []Pizza) []OrderDelivery {
 		}
 	}
 
-	for i := 0; i < config.nTeamOfFour; i++ {
+	for i := 0; i < teamOfFour; i++ {
 		if pizzaCounter+4 > len(filteredPizzas) {
 			return orders
 		}
@@ -134,7 +254,7 @@ func firstPlaceOrder(config Config, pizzas []Pizza) []OrderDelivery {
 		orders = append(orders, order)
 	}
 
-	for i := 0; i < config.nTeamOfThree; i++ {
+	for i := 0; i < teamOfThree; i++ {
 		if pizzaCounter+3 > len(filteredPizzas) {
 			return orders
 		}
@@ -150,7 +270,7 @@ func firstPlaceOrder(config Config, pizzas []Pizza) []OrderDelivery {
 		orders = append(orders, order)
 	}
 
-	for i := 0; i < config.nTeamOfTwo; i++ {
+	for i := 0; i < teamOfTwo; i++ {
 		if pizzaCounter+2 > len(filteredPizzas) {
 			return orders
 		}
