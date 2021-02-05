@@ -18,6 +18,9 @@ func main() {
 	}
 
 	for _, fileName := range files {
+		fmt.Printf("--------------------------------------------------------")
+		fmt.Printf("****************** INPUT: %s\n", fileName)
+
 		inputSet := readFile(fmt.Sprintf("./dataset/%s", fileName))
 
 		parts := strings.Split(inputSet, "\n")
@@ -33,10 +36,18 @@ func main() {
 		for _, order := range orders {
 			result += fmt.Sprintf("%d %s\n", len(order.pizzas), strings.Join(order.pizzas, " "))
 		}
-		fmt.Printf("%s", result)
 
 		ioutil.WriteFile(fmt.Sprintf("./result/%s", fileName), []byte(result), 0644)
 	}
+}
+
+func unservedPizzas(pizzas []Pizza) (count int) {
+	for _, pizza := range pizzas {
+		if !pizza.taken {
+			count++
+		}
+	}
+	return
 }
 
 func sortPizzas(pizzas []Pizza) {
@@ -51,6 +62,11 @@ func firstPlaceOrder(config Config, pizzas []Pizza) []OrderDelivery {
 	teamOfFour := config.nTeamOfFour
 	teamOfThree := config.nTeamOfThree
 	teamOfTwo := config.nTeamOfTwo
+
+	fmt.Printf("****************** Team requests:\n")
+	fmt.Printf("****************** 4 people team: %d\n", config.nTeamOfFour)
+	fmt.Printf("****************** 4 people team: %d\n", config.nTeamOfThree)
+	fmt.Printf("****************** 4 people team: %d\n", config.nTeamOfTwo)
 
 	for i := 0; i < config.nTeamOfFour; i++ {
 		pizzasOrder := make([]Pizza, 4)
@@ -241,7 +257,7 @@ func firstPlaceOrder(config Config, pizzas []Pizza) []OrderDelivery {
 
 	for i := 0; i < teamOfFour; i++ {
 		if pizzaCounter+4 > len(filteredPizzas) {
-			return orders
+			break
 		}
 
 		filteredPizzas[pizzaCounter].taken = true
@@ -263,7 +279,7 @@ func firstPlaceOrder(config Config, pizzas []Pizza) []OrderDelivery {
 
 	for i := 0; i < teamOfThree; i++ {
 		if pizzaCounter+3 > len(filteredPizzas) {
-			return orders
+			break
 		}
 
 		filteredPizzas[pizzaCounter].taken = true
@@ -283,7 +299,7 @@ func firstPlaceOrder(config Config, pizzas []Pizza) []OrderDelivery {
 
 	for i := 0; i < teamOfTwo; i++ {
 		if pizzaCounter+2 > len(filteredPizzas) {
-			return orders
+			break
 		}
 
 		filteredPizzas[pizzaCounter].taken = true
@@ -298,6 +314,8 @@ func firstPlaceOrder(config Config, pizzas []Pizza) []OrderDelivery {
 		pizzaCounter += 2
 		orders = append(orders, order)
 	}
+
+	fmt.Printf("****************** Unserved pizzas: %d :(\n", unservedPizzas(filteredPizzas))
 
 	return orders
 }
