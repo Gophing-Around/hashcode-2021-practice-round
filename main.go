@@ -77,7 +77,8 @@ func firstPlaceOrder(config Config, pizzas []Pizza) []OrderDelivery {
 
 			var hasMatches bool
 			for _, piOrder := range pizzasOrder {
-				if howManyIngredientEquals(piOrder.ingrMap, pizzas[j].ingrMap) != 0 {
+				threshold := float64(piOrder.nIngr) / 10.0
+				if float64(howManyIngredientEquals(piOrder.ingrMap, pizzas[j].ingrMap)) > threshold {
 					hasMatches = true
 				}
 			}
@@ -228,7 +229,7 @@ func firstPlaceOrder(config Config, pizzas []Pizza) []OrderDelivery {
 	fmt.Println("*********************************************************")
 	fmt.Println("FILL ORDERS start")
 	fmt.Println("*********************************************************")
-	// FILL ORDERS
+
 	pizzaCounter = 0
 	filteredPizzas := []Pizza{}
 	for _, pizza := range pizzas {
