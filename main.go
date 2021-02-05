@@ -17,7 +17,6 @@ func main() {
 		"e_many_teams.in",
 	}
 
-	// desired := 0
 	for _, fileName := range files {
 		inputSet := readFile(fmt.Sprintf("./dataset/%s", fileName))
 
@@ -51,20 +50,18 @@ func firstPlaceOrder(config Config, pizzas []Pizza) []OrderDelivery {
 	pizzaCounter := 0
 
 	for i := 0; i < config.nTeamOfFour; i++ {
-		if pizzaCounter+4 > len(pizzas) {
-			return orders
-		}
-
 		pizzasOrder := make([]Pizza, 4)
 
-		for {
+		for pizzaCounter < len(pizzas) {
 			if !pizzas[pizzaCounter].taken {
 				break
 			}
 			pizzaCounter++
 		}
+		if pizzaCounter == len(pizzas) {
+			break
+		}
 
-		// pizzasOrder = append(pizzasOrder, pizzas[pizzaCounter])
 		pizzasOrder[0] = pizzas[pizzaCounter]
 		pizzas[pizzaCounter].taken = true
 		pizzaCounter++
@@ -92,25 +89,45 @@ func firstPlaceOrder(config Config, pizzas []Pizza) []OrderDelivery {
 		}
 
 		order := OrderDelivery{
-			pizzas: getPizzasIDs(pizzas),
+			pizzas: getPizzasIDs(pizzasOrder),
 		}
 
-		pizzaCounter += 4
-		orders = append(orders, order)
+		if initC == 4 {
+			orders = append(orders, order)
+		} else {
+			for idx, pizza := range pizzas {
+				for _, pizzaOrder := range pizzasOrder {
+					if pizzaOrder.pizzaID == pizza.pizzaID {
+						pizzas[idx].taken = false
+					}
+				}
+			}
+		}
 	}
 
+	fmt.Println("*********************************************************")
+	fmt.Println("FILL ORDERS start")
+	fmt.Println("*********************************************************")
 	// FILL ORDERS
+	pizzaCounter = 0
+	filteredPizzas := []Pizza{}
+	for _, pizza := range pizzas {
+		if !pizza.taken {
+			filteredPizzas = append(filteredPizzas, pizza)
+		}
+	}
+
 	for i := 0; i < config.nTeamOfFour; i++ {
-		if pizzaCounter+4 > len(pizzas) {
+		if pizzaCounter+4 > len(filteredPizzas) {
 			return orders
 		}
 
 		order := OrderDelivery{
 			pizzas: []string{
-				pizzas[pizzaCounter].pizzaID,
-				pizzas[pizzaCounter+1].pizzaID,
-				pizzas[pizzaCounter+2].pizzaID,
-				pizzas[pizzaCounter+3].pizzaID,
+				filteredPizzas[pizzaCounter].pizzaID,
+				filteredPizzas[pizzaCounter+1].pizzaID,
+				filteredPizzas[pizzaCounter+2].pizzaID,
+				filteredPizzas[pizzaCounter+3].pizzaID,
 			},
 		}
 		pizzaCounter += 4
@@ -118,15 +135,15 @@ func firstPlaceOrder(config Config, pizzas []Pizza) []OrderDelivery {
 	}
 
 	for i := 0; i < config.nTeamOfThree; i++ {
-		if pizzaCounter+3 > len(pizzas) {
+		if pizzaCounter+3 > len(filteredPizzas) {
 			return orders
 		}
 
 		order := OrderDelivery{
 			pizzas: []string{
-				pizzas[pizzaCounter].pizzaID,
-				pizzas[pizzaCounter+1].pizzaID,
-				pizzas[pizzaCounter+2].pizzaID,
+				filteredPizzas[pizzaCounter].pizzaID,
+				filteredPizzas[pizzaCounter+1].pizzaID,
+				filteredPizzas[pizzaCounter+2].pizzaID,
 			},
 		}
 		pizzaCounter += 3
@@ -134,14 +151,14 @@ func firstPlaceOrder(config Config, pizzas []Pizza) []OrderDelivery {
 	}
 
 	for i := 0; i < config.nTeamOfTwo; i++ {
-		if pizzaCounter+2 > len(pizzas) {
+		if pizzaCounter+2 > len(filteredPizzas) {
 			return orders
 		}
 
 		order := OrderDelivery{
 			pizzas: []string{
-				pizzas[pizzaCounter].pizzaID,
-				pizzas[pizzaCounter+1].pizzaID,
+				filteredPizzas[pizzaCounter].pizzaID,
+				filteredPizzas[pizzaCounter+1].pizzaID,
 			},
 		}
 		pizzaCounter += 2
