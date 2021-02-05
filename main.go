@@ -93,7 +93,7 @@ func firstPlaceOrder(config Config, pizzas []Pizza) []OrderDelivery {
 
 			var hasMatches bool
 			for _, piOrder := range pizzasOrder {
-				threshold := float64(piOrder.nIngr) / 30.0
+				threshold := float64(piOrder.nIngr) / 25.0
 				if float64(howManyIngredientEquals(piOrder.ingrMap, pizzas[j].ingrMap)) > threshold {
 					hasMatches = true
 				}
