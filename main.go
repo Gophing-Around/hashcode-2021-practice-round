@@ -77,7 +77,7 @@ func firstPlaceOrder(config Config, pizzas []Pizza) []OrderDelivery {
 
 			var hasMatches bool
 			for _, piOrder := range pizzasOrder {
-				threshold := float64(piOrder.nIngr) / 10.0
+				threshold := float64(piOrder.nIngr) / 50.0
 				if float64(howManyIngredientEquals(piOrder.ingrMap, pizzas[j].ingrMap)) > threshold {
 					hasMatches = true
 				}
@@ -136,7 +136,8 @@ func firstPlaceOrder(config Config, pizzas []Pizza) []OrderDelivery {
 
 			var hasMatches bool
 			for _, piOrder := range pizzasOrder {
-				if howManyIngredientEquals(piOrder.ingrMap, pizzas[j].ingrMap) != 0 {
+				threshold := float64(piOrder.nIngr) / 100.0
+				if float64(howManyIngredientEquals(piOrder.ingrMap, pizzas[j].ingrMap)) > threshold {
 					hasMatches = true
 				}
 			}
@@ -243,6 +244,11 @@ func firstPlaceOrder(config Config, pizzas []Pizza) []OrderDelivery {
 			return orders
 		}
 
+		filteredPizzas[pizzaCounter].taken = true
+		filteredPizzas[pizzaCounter+1].taken = true
+		filteredPizzas[pizzaCounter+2].taken = true
+		filteredPizzas[pizzaCounter+3].taken = true
+
 		order := OrderDelivery{
 			pizzas: []string{
 				filteredPizzas[pizzaCounter].pizzaID,
@@ -260,6 +266,10 @@ func firstPlaceOrder(config Config, pizzas []Pizza) []OrderDelivery {
 			return orders
 		}
 
+		filteredPizzas[pizzaCounter].taken = true
+		filteredPizzas[pizzaCounter+1].taken = true
+		filteredPizzas[pizzaCounter+2].taken = true
+
 		order := OrderDelivery{
 			pizzas: []string{
 				filteredPizzas[pizzaCounter].pizzaID,
@@ -275,6 +285,9 @@ func firstPlaceOrder(config Config, pizzas []Pizza) []OrderDelivery {
 		if pizzaCounter+2 > len(filteredPizzas) {
 			return orders
 		}
+
+		filteredPizzas[pizzaCounter].taken = true
+		filteredPizzas[pizzaCounter+1].taken = true
 
 		order := OrderDelivery{
 			pizzas: []string{
